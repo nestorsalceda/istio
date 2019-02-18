@@ -61,7 +61,7 @@ public class LibertyRestEndpoint extends Application {
         }
       }
     	result += "},";
-    	
+
     	// reviewer 2:
     	result += "{";
     	result += "  \"reviewer\": \"Reviewer2\",";
@@ -75,15 +75,14 @@ public class LibertyRestEndpoint extends Application {
         }
       }
     	result += "}";
-    	
+
     	result += "]";
     	result += "}";
 
     	return result;
     }
-    
-    private JsonObject getRatings(String productId, String user, String useragent, String xreq, String xtraceid, String xspanid,
-                                  String xparentspanid, String xsampled, String xflags, String xotspan){
+
+    private JsonObject getRatings(String productId, String user, String useragent){
       ClientBuilder cb = ClientBuilder.newBuilder();
       String timeout = star_color.equals("black") ? "10000" : "2500";
       cb.property("com.ibm.ws.jaxrs.client.connection.timeout", timeout);
@@ -91,27 +90,6 @@ public class LibertyRestEndpoint extends Application {
       Client client = cb.build();
       WebTarget ratingsTarget = client.target(ratings_service + "/" + productId);
       Invocation.Builder builder = ratingsTarget.request(MediaType.APPLICATION_JSON);
-      if(xreq!=null) {
-        builder.header("x-request-id",xreq);
-      }
-      if(xtraceid!=null) {
-        builder.header("x-b3-traceid",xtraceid);
-      }
-      if(xspanid!=null) {
-        builder.header("x-b3-spanid",xspanid);
-      }
-      if(xparentspanid!=null) {
-        builder.header("x-b3-parentspanid",xparentspanid);
-      }
-      if(xsampled!=null) {
-        builder.header("x-b3-sampled",xsampled);
-      }
-      if(xflags!=null) {
-        builder.header("x-b3-flags",xflags);
-      }
-      if(xotspan!=null) {
-        builder.header("x-ot-span-context",xotspan);
-      }
       if(user!=null) {
         builder.header("end-user", user);
       }
@@ -142,19 +120,12 @@ public class LibertyRestEndpoint extends Application {
     @Path("/reviews/{productId}")
     public Response bookReviewsById(@PathParam("productId") int productId,
                                     @HeaderParam("end-user") String user,
-                                    @HeaderParam("user-agent") String useragent,
-                                    @HeaderParam("x-request-id") String xreq,
-                                    @HeaderParam("x-b3-traceid") String xtraceid,
-                                    @HeaderParam("x-b3-spanid") String xspanid,
-                                    @HeaderParam("x-b3-parentspanid") String xparentspanid,
-                                    @HeaderParam("x-b3-sampled") String xsampled,
-                                    @HeaderParam("x-b3-flags") String xflags,
-                                    @HeaderParam("x-ot-span-context") String xotspan) {
+                                    @HeaderParam("user-agent") String useragent) {
       int starsReviewer1 = -1;
       int starsReviewer2 = -1;
 
       if (ratings_enabled) {
-        JsonObject ratingsResponse = getRatings(Integer.toString(productId), user, useragent, xreq, xtraceid, xspanid, xparentspanid, xsampled, xflags, xotspan);
+        JsonObject ratingsResponse = getRatings(Integer.toString(productId), user, useragent);
         if (ratingsResponse != null) {
           if (ratingsResponse.containsKey("ratings")) {
             JsonObject ratings = ratingsResponse.getJsonObject("ratings");
@@ -166,7 +137,7 @@ public class LibertyRestEndpoint extends Application {
             }
           }
         }
-      } 
+      }
 
       String jsonResStr = getJsonResponse(Integer.toString(productId), starsReviewer1, starsReviewer2);
       return Response.ok().type(MediaType.APPLICATION_JSON).entity(jsonResStr).build();
