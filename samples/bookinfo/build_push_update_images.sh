@@ -30,15 +30,15 @@ src/build-services.sh "${VERSION}"
 #get all the new image names and tags
 for v in ${VERSION} "latest"
 do
-  IMAGES+=$(docker images -f reference=istio/examples-bookinfo*:"$v" --format "{{.Repository}}:$v")
+  IMAGES+=$(docker images -f reference=nestorsalceda/examples-bookinfo*:"$v" --format "{{.Repository}}:$v")
   IMAGES+=" "
 done
 
 #push images
-for IMAGE in ${IMAGES}; 
-do 
-  echo "Pushing: ${IMAGE}" 
-  docker push "${IMAGE}"; 
+for IMAGE in ${IMAGES};
+do
+  echo "Pushing: ${IMAGE}"
+  docker push "${IMAGE}";
 done
 
 #Update image references in the yaml files
